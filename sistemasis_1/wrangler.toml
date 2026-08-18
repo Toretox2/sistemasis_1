@@ -1,4 +1,4 @@
-name = "sistemasis-1"
+name = "sistemasis-attendance-worker"
 type = "javascript"
 
 # Replace with your Cloudflare Account ID before publishing
