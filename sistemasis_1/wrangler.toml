@@ -1,10 +1,10 @@
 name = "sistemasis-attendance-worker"
-type = "javascript"
+main = "workers/get_attendance_logs/index.js"
+compatibility_date = "2026-08-18"
 
 # Replace with your Cloudflare Account ID before publishing
 account_id = "PUT_YOUR_ACCOUNT_ID_HERE"
 
-# If you want to test in workers.dev
 workers_dev = true
 
 [env.production]

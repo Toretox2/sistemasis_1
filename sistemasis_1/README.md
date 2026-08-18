@@ -22,7 +22,9 @@ Configuración rápida:
 
 Despliegue en Cloudflare Pages:
 
-- Suba los archivos estáticos (`scanner.html`, `admin.html`, `assets/`...) a un repo Git y conecte a Cloudflare Pages.
+- Suba los archivos estáticos (`index.html`, `scanner.html`, `login.html`, `admin.html`, `assets/`...) a un repo Git y conecte a Cloudflare Pages.
+- En Pages use preset `None`, deje vacío el comando de build y use `.` como directorio de salida.
+- `wrangler.toml` es para el Worker y no debe utilizarse como comando de build de Pages.
 - Configure variables de entorno para la build si necesita inyectar `SUPABASE_URL`/`ANON_KEY` o utilice un archivo `config.js` que no contenga secretos.
 
 Endpoint seguro (recomendado)
