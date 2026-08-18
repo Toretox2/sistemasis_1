@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scanner - Asistencia QR</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
+    <div class="w-full max-w-md mx-auto">
+      <header class="mb-4 text-center">
+        <h1 class="text-2xl font-bold text-blue-300">Registro de Asistencia</h1>
+        <p class="text-sm text-gray-300">Escanea tu código QR para registrar asistencia</p>
+      </header>
+
+      <main class="bg-gray-900/60 rounded-xl shadow-lg p-4">
+        <div id="reader" class="w-full rounded overflow-hidden bg-black" style="aspect-ratio: 4/5;"></div>
+
+        <div class="mt-3 flex items-center justify-between">
+          <div id="status" class="text-sm text-gray-300">Estado: esperando</div>
+          <div class="flex items-center">
+            <button id="startBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded mr-2 text-sm">Iniciar</button>
+            <button id="stopBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm">Detener</button>
+          </div>
+        </div>
+
+        <div id="message" class="mt-3 text-sm"></div>
+      </main>
+
+      <footer class="mt-4 text-center text-xs text-gray-400">
+        <div>Optimizado para dispositivos móviles • Cámara trasera por defecto</div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Config (defines window.LOG_ENDPOINT, etc.) -->
+  <script src="assets/js/config.js"></script>
+  <!-- html5-qrcode -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+  <!-- SweetAlert2 for toasts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="assets/js/scanner.js"></script>
+</body>
+</html>

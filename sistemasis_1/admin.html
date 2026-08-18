@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Sistema de Asistencia QR</title>
+  <meta name="description" content="Panel administrativo - asistencias QR" />
+  <script src="https://cdn.tailwindcss.com" integrity="sha384-igm5BeiBt36UU4gqwWS7imYmelpTsZlQ45FZf+XBn9MuJbn4nQr7yx1yFydocC/K" crossorigin="anonymous"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <style>
+    .kpi-card { transition: transform .15s ease, box-shadow .15s ease; }
+    .kpi-card:hover { transform: translateY(-4px); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <div class="flex">
+    <aside class="w-64 bg-white border-r border-slate-200 min-h-screen p-4 shadow-sm">
+      <div class="mb-8">
+        <h1 class="text-xl font-semibold text-slate-800">Asistencia QR</h1>
+        <p class="text-sm text-slate-500 mt-1">Panel administrativo</p>
+      </div>
+      <nav class="space-y-2">
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 transition text-slate-700">
+          <span class="w-2 h-2 bg-primary-600 rounded-full"></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="scanner.html" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 transition text-slate-700">
+          <span>Escáner</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="flex-1 p-6">
+      <header class="mb-6 flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
+          <p class="text-sm text-slate-500">Resumen de asistencias y listado</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-slate-600 text-sm">Conectado a: <span id="supabase-url" class="font-mono text-xs text-slate-800"></span></div>
+          <button id="logout-btn" class="inline-flex items-center px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition">Salir</button>
+        </div>
+      </header>
+
+      <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Asistencias hoy</div>
+          <div id="kpi-today" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+        </div>
+        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Asistencias (7 días)</div>
+          <div id="kpi-week" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+        </div>
+        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Usuarios totales</div>
+          <div id="kpi-users" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+        </div>
+      </section>
+
+      <section class="bg-white p-4 rounded-xl mb-6 border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div class="flex-1">
+            <label for="search-name" class="text-sm text-slate-600">Buscar por nombre</label>
+            <input id="search-name" type="search" placeholder="Buscar usuario..." class="mt-1 w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div>
+            <label for="date-start" class="text-sm text-slate-600">Fecha inicio</label>
+            <input id="date-start" type="date" class="mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div>
+            <label for="date-end" class="text-sm text-slate-600">Fecha fin</label>
+            <input id="date-end" type="date" class="mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-apply" class="ml-auto inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow-sm hover:bg-primary-500 transition">Aplicar</button>
+            <button id="btn-reset" class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg shadow-sm hover:bg-slate-200 transition">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left divide-y divide-slate-200">
+            <thead class="text-slate-600 text-sm">
+              <tr>
+                <th class="px-4 py-3">Fecha / Hora</th>
+                <th class="px-4 py-3">Usuario</th>
+                <th class="px-4 py-3">Dispositivo</th>
+                <th class="px-4 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="logs-body" class="divide-y divide-slate-200 bg-slate-50 text-sm"></tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button id="pagination-prev" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">Anterior</button>
+            <button id="pagination-next" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">Siguiente</button>
+            <div id="page-info" class="text-sm text-slate-500 ml-3">Página 1</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="page-size" class="text-sm text-slate-600">Tamaño</label>
+            <select id="page-size" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-800">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" integrity="sha384-H0+N1qRk/NwJYowrscC9J1eUv1Bi9XcSadS2n+W7zIAhXfr2ay0X+sRLx93DUWkQ" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js" integrity="sha384-DpVxUeeBWjUvUV1czyIHJAjh+jYUZFu2lLakbdua5vbwOrBGi1UgaKCHjTC+x3Ky" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      const supabase = window.supabase ? window.supabase.createClient(window.SUPABASE_URL || '', window.SUPABASE_ANON_KEY || '') : null;
+      const logoutBtn = document.getElementById('logout-btn');
+
+      function redirectToLogin() {
+        window.localStorage.removeItem('supabase_session');
+        window.localStorage.removeItem('supabase_user');
+        window.location.href = 'login.html';
+      }
+
+      if (!supabase) {
+        redirectToLogin();
+        return;
+      }
+
+      supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) {
+          redirectToLogin();
+        }
+      }).catch(() => redirectToLogin());
+
+      window.SUPABASE_URL = window.SUPABASE_URL || '';
+      window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+      document.getElementById('supabase-url').textContent = window.SUPABASE_URL || 'no configurado';
+
+      logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        redirectToLogin();
+      });
+    })();
+  </script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

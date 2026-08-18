@@ -1,0 +1,18 @@
+name = "sistemasis-attendance-worker"
+type = "javascript"
+
+# Replace with your Cloudflare Account ID before publishing
+account_id = "PUT_YOUR_ACCOUNT_ID_HERE"
+
+# If you want to test in workers.dev
+workers_dev = true
+
+[env.production]
+# Replace or uncomment route to bind to a custom domain
+# route = "<your-production-route>"
+name = "sistemasis-attendance-worker-prod"
+
+# Optionally, define environment-specific vars here or use wrangler secret put
+# For example:
+# [env.production.vars]
+# SUPABASE_URL = "https://<your-project>.supabase.co"
