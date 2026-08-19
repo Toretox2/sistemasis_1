@@ -42,6 +42,13 @@ function toastError(title) {
   })
 }
 
+function getBackendError(response, payload, text) {
+  if (response.status === 500 && /misconfigured/i.test(payload?.error || text || '')) {
+    return 'El backend no está configurado. Define SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Cloudflare.'
+  }
+  return payload?.error || text || `HTTP ${response.status}`
+}
+
 function createScanner() {
   if (html5QrcodeScanner) return
 
@@ -86,6 +93,10 @@ async function onScanSuccess(decodedText, decodedResult) {
   }
 
   try {
+    if (!LOG_ENDPOINT || !/^https?:\/\//.test(LOG_ENDPOINT) && !LOG_ENDPOINT.startsWith('/')) {
+      throw new Error('LOG_ENDPOINT no está configurado correctamente')
+    }
+
     const res = await fetch(LOG_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -97,8 +108,7 @@ async function onScanSuccess(decodedText, decodedResult) {
     try { payload = JSON.parse(text) } catch (e) { payload = { result: text } }
     if (!res.ok) {
       setStatus('error')
-      const errMsg = payload && payload.error ? payload.error : (text || res.status)
-      toastError('Error registrando: ' + errMsg)
+      toastError(getBackendError(res, payload, text))
     } else {
       setStatus('registrado')
       // If server returned user name, show a richer modal

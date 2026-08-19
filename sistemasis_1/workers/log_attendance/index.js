@@ -20,10 +20,14 @@ async function handleRequest(request) {
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': isAllowed ? origin || '*' : 'null' } })
   }
-  const SUPABASE_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : process.env.SUPABASE_URL
-  const SERVICE_ROLE = typeof SUPABASE_SERVICE_ROLE_KEY !== 'undefined' ? SUPABASE_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = typeof globalThis.SUPABASE_URL !== 'undefined'
+    ? globalThis.SUPABASE_URL
+    : (typeof process !== 'undefined' ? process.env.SUPABASE_URL : '')
+  const serviceRole = typeof globalThis.SUPABASE_SERVICE_ROLE_KEY !== 'undefined'
+    ? globalThis.SUPABASE_SERVICE_ROLE_KEY
+    : (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : '')
 
-  if (!SUPABASE_URL || !SERVICE_ROLE) {
+  if (!supabaseUrl || !serviceRole) {
     return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
 
@@ -56,12 +60,12 @@ async function handleRequest(request) {
   }
 
   try {
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/log_attendance_by_token`, {
+    const resp = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/log_attendance_by_token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        apikey: SERVICE_ROLE,
-        Authorization: `Bearer ${SERVICE_ROLE}`,
+        apikey: serviceRole,
+        Authorization: `Bearer ${serviceRole}`,
       },
       body: JSON.stringify({ p_token: token, p_device_info: device_info || '' })
     })

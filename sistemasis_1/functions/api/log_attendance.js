@@ -43,8 +43,11 @@ export async function onRequest(context) {
 
   const supabaseUrl = env.SUPABASE_URL
   const serviceRole = env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !serviceRole) {
-    return new Response(JSON.stringify({ error: 'Server misconfigured' }), { status: 500, headers: baseHeaders })
+  if (!supabaseUrl || !/^https:\/\/[^\s/]+\.supabase\.co\/?$/.test(supabaseUrl)) {
+    return new Response(JSON.stringify({ error: 'Backend sin configurar: SUPABASE_URL falta o no es válida.' }), { status: 500, headers: baseHeaders })
+  }
+  if (!serviceRole) {
+    return new Response(JSON.stringify({ error: 'Backend sin configurar: falta SUPABASE_SERVICE_ROLE_KEY en Cloudflare.' }), { status: 500, headers: baseHeaders })
   }
 
   try {

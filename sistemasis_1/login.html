@@ -59,7 +59,12 @@
     const statusEl = document.getElementById('login-status');
     const btn = document.getElementById('login-btn');
 
-    const supabase = window.supabase ? window.supabase.createClient(window.SUPABASE_URL || '', window.SUPABASE_ANON_KEY || '') : null;
+    const hasSupabaseConfig = typeof window.isSupabaseClientConfigValid === 'function'
+      ? window.isSupabaseClientConfigValid()
+      : Boolean(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
+    const supabase = window.supabase && hasSupabaseConfig
+      ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+      : null;
 
     function setStatus(message, isError = false) {
       statusEl.textContent = message;
@@ -75,7 +80,7 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!supabase) {
-        setStatus('Falta la configuración de Supabase. Revisa window.SUPABASE_URL y window.SUPABASE_ANON_KEY.', true);
+        setStatus('Configuración de Supabase inválida. Revisa SUPABASE_URL y SUPABASE_ANON_KEY en assets/js/config.js.', true);
         return;
       }
 

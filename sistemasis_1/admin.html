@@ -135,7 +135,12 @@
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js" integrity="sha384-DpVxUeeBWjUvUV1czyIHJAjh+jYUZFu2lLakbdua5vbwOrBGi1UgaKCHjTC+x3Ky" crossorigin="anonymous"></script>
   <script>
     (function () {
-      const supabase = window.supabase ? window.supabase.createClient(window.SUPABASE_URL || '', window.SUPABASE_ANON_KEY || '') : null;
+      const hasSupabaseConfig = typeof window.isSupabaseClientConfigValid === 'function'
+        ? window.isSupabaseClientConfigValid()
+        : Boolean(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
+      const supabase = window.supabase && hasSupabaseConfig
+        ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+        : null;
       const logoutBtn = document.getElementById('logout-btn');
 
       function redirectToLogin() {
@@ -145,6 +150,7 @@
       }
 
       if (!supabase) {
+        document.getElementById('supabase-url').textContent = 'configuración inválida';
         redirectToLogin();
         return;
       }
