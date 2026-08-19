@@ -48,7 +48,7 @@ Uso en el cliente
 
 Pages Functions
 
-- Si despliegas en Cloudflare Pages, coloca el archivo `functions/log_attendance.js` (ya incluido) en la raíz del sitio y Pages lo servirá en `/api/log_attendance` automáticamente.
+- Si despliegas en Cloudflare Pages, coloca el archivo `functions/api/log_attendance.js` en la raíz del repositorio; Pages lo servirá en `/api/log_attendance` automáticamente.
 - Para habilitar rate-limiting con KV en Pages, vincula un namespace KV y nómbralo `RATE_LIMIT_KV` en la configuración de Pages.
 
 
@@ -62,7 +62,7 @@ Despliegue recomendado (pasos concretos)
 1) Cloudflare Pages (sitio estático + Functions)
 
 - Conecta el repo a Cloudflare Pages y configura la rama para publicar.
-- Asegúrate de que `functions/log_attendance.js` esté en la raíz del repo; Pages lo expondrá en `/api/log_attendance`.
+- Asegúrate de que `functions/api/log_attendance.js` esté en el repositorio y despliega mediante Git; una subida manual de archivos estáticos no publica Pages Functions.
 - En Settings > Environment variables añade:
 	- `SUPABASE_URL` = https://<tu-proyecto>.supabase.co
 	- `SUPABASE_SERVICE_ROLE_KEY` = <service_role_key>

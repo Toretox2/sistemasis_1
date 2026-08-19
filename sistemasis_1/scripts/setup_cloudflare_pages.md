@@ -33,9 +33,9 @@ No configures `wrangler.toml` como comando de build. Ese archivo se usa para pub
 ## Subida manual
 
 Si utilizas `Add files via upload`, sube únicamente los archivos del sitio estático:
-`index.html`, `scanner.html`, `login.html`, `admin.html` y `assets/`.
+`index.html`, `scanner.html`, `login.html`, `admin.html` y `assets/`. Esa modalidad no publica Pages Functions.
 
-La carpeta `functions/` no debe ser el mecanismo principal de la subida manual. Publica los Workers desde la raíz del proyecto con Wrangler y después coloca sus URLs en `assets/js/config.js`:
+Para que `/api/log_attendance` funcione, conecta el repositorio mediante Git y conserva `functions/api/log_attendance.js`. Como alternativa, publica el Worker de registro desde Wrangler y coloca su URL en `assets/js/config.js`:
 
 ```js
 window.ADMIN_ENDPOINT = 'https://tu-worker-admin.workers.dev';
