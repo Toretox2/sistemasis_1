@@ -22,7 +22,7 @@ async function handleRequest(request) {
   }
   const supabaseUrl = typeof globalThis.SUPABASE_URL !== 'undefined'
     ? globalThis.SUPABASE_URL
-    : (typeof process !== 'undefined' ? process.env.SUPABASE_URL : '')
+    : (typeof process !== 'undefined' ? process.env.SUPABASE_URL : 'https://bkgnoksrwesofqyxhohk.supabase.co')
   const serviceRole = typeof globalThis.SUPABASE_SERVICE_ROLE_KEY !== 'undefined'
     ? globalThis.SUPABASE_SERVICE_ROLE_KEY
     : (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : '')

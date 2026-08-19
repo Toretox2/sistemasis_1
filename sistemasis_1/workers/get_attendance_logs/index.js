@@ -56,8 +56,8 @@ async function handleRequest(request){
   const p_offset = params.get('offset') || body.p_offset || 0
 
   // call Supabase RPC using service role
-  const supabaseUrl = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : ''
-  const serviceRole = typeof SUPABASE_SERVICE_ROLE_KEY !== 'undefined' ? SUPABASE_SERVICE_ROLE_KEY : ''
+  const supabaseUrl = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://bkgnoksrwesofqyxhohk.supabase.co').trim()
+  const serviceRole = (typeof SUPABASE_SERVICE_ROLE_KEY !== 'undefined' ? SUPABASE_SERVICE_ROLE_KEY : '').trim()
   if (!supabaseUrl || !serviceRole) return jsonResponse({ error: 'Server not configured' }, 500)
 
   const authResponse = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/user`, {

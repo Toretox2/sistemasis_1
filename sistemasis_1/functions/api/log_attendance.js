@@ -41,8 +41,8 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ error: 'Invalid token' }), { status: 400, headers: baseHeaders })
   }
 
-  const supabaseUrl = env.SUPABASE_URL
-  const serviceRole = env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = (env.SUPABASE_URL || 'https://bkgnoksrwesofqyxhohk.supabase.co').trim()
+  const serviceRole = (env.SUPABASE_SERVICE_ROLE_KEY || '').trim()
   if (!supabaseUrl || !/^https:\/\/[^\s/]+\.supabase\.co\/?$/.test(supabaseUrl)) {
     return new Response(JSON.stringify({ error: 'Backend sin configurar: SUPABASE_URL falta o no es válida.' }), { status: 500, headers: baseHeaders })
   }
