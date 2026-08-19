@@ -43,6 +43,8 @@ function toastError(title) {
 }
 
 function createScanner() {
+  if (html5QrcodeScanner) return
+
   if (!window.Html5QrcodeScanner) {
     setStatus('Scanner no disponible')
     toastError('Librería de escaneo no cargada')
@@ -59,7 +61,7 @@ function createScanner() {
     }
   }
 
-  html5QrcodeScanner = new Html5QrcodeScanner(readerElId, config, false)
+  html5QrcodeScanner = new window.Html5QrcodeScanner(readerElId, config, false)
   html5QrcodeScanner.render(onScanSuccess, onScanError)
   setStatus('buscando QR...')
 }
@@ -147,3 +149,14 @@ stopBtn.addEventListener('click', async () => {
     }
   }
 })
+
+function initializeScanner() {
+  if (!document.getElementById(readerElId)) return
+  createScanner()
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeScanner, { once: true })
+} else {
+  initializeScanner()
+}
