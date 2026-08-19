@@ -30,6 +30,11 @@ DECLARE
   inserted_ts timestamptz;
   result jsonb;
 BEGIN
+  p_token := btrim(p_token);
+  IF p_token IS NULL OR p_token = '' OR length(p_token) > 512 THEN
+    RAISE EXCEPTION 'Token QR inválido';
+  END IF;
+
   SELECT id, nombre, photo_url INTO u_id, u_name, u_photo FROM public.users WHERE qr_token = p_token LIMIT 1;
   IF u_id IS NULL THEN
     RAISE EXCEPTION 'Usuario no encontrado para token %', p_token;

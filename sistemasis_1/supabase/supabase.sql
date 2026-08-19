@@ -38,7 +38,7 @@ CREATE POLICY "Service role manage users" ON public.users
 -- Policy para attendance_logs: permitir INSERT si el user_id ya existe
 CREATE POLICY "Allow insert if user exists" ON public.attendance_logs
   FOR INSERT
-  WITH CHECK ( EXISTS ( SELECT 1 FROM public.users u WHERE u.id = NEW.user_id ) );
+  WITH CHECK ( EXISTS ( SELECT 1 FROM public.users u WHERE u.id = user_id ) );
 
 -- Policy para lectura de logs: permitir a usuarios autenticados ver sus propios logs
 CREATE POLICY "Allow users read their logs" ON public.attendance_logs
@@ -62,6 +62,11 @@ DECLARE
   inserted_ts timestamptz;
   result jsonb;
 BEGIN
+  p_token := btrim(p_token);
+  IF p_token IS NULL OR p_token = '' OR length(p_token) > 512 THEN
+    RAISE EXCEPTION 'Token QR inválido';
+  END IF;
+
   SELECT id, nombre, photo_url INTO u_id, u_name, u_photo FROM public.users WHERE qr_token = p_token LIMIT 1;
   IF u_id IS NULL THEN
     RAISE EXCEPTION 'Usuario no encontrado para token %', p_token;

@@ -14,6 +14,7 @@ const readerElId = 'reader'
 
 let html5QrcodeScanner = null
 let lastScan = 0
+let scanInProgress = false
 
 function setStatus(text) {
   statusEl.textContent = 'Estado: ' + text
@@ -47,6 +48,30 @@ function toastError(title) {
   })
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+}
+
+function getRpcErrorMessage(error) {
+  const message = error?.message || 'No se pudo registrar la asistencia.'
+  if (/usuario no encontrado/i.test(message)) return 'El código QR no está registrado.'
+  if (/duplicate|duplicado/i.test(message)) return 'Esta asistencia ya fue registrada.'
+  if (/permission|not authorized|privilege/i.test(message)) return 'Supabase no permite ejecutar el registro. Revisa los permisos del RPC.'
+  if (/network|fetch|failed/i.test(message)) return 'No se pudo conectar con Supabase. Comprueba tu conexión.'
+  return message
+}
+
+async function restartScanner() {
+  await new Promise((resolve) => setTimeout(resolve, 1200))
+  scanInProgress = false
+  createScanner()
+}
+
 function createScanner() {
   if (html5QrcodeScanner) return
 
@@ -73,7 +98,14 @@ function createScanner() {
 
 async function onScanSuccess(decodedText, decodedResult) {
   const now = Date.now()
-  if (now - lastScan < 2000) return
+  if (scanInProgress || now - lastScan < 2000) return
+  const token = String(decodedText || '').trim()
+  if (!token || token.length > 512) {
+    toastError('Código QR inválido')
+    return
+  }
+
+  scanInProgress = true
   lastScan = now
 
   setStatus('token detectado')
@@ -102,16 +134,16 @@ async function onScanSuccess(decodedText, decodedResult) {
 
     if (error) {
       setStatus('error')
-      toastError('Error registrando: ' + error.message)
+      toastError(getRpcErrorMessage(error))
     } else {
       setStatus('registrado')
       // If server returned user name, show a richer modal
-      if (payload && payload.nombre) {
+      if (payload?.nombre) {
         const serverTime = payload.created_at ? new Date(payload.created_at).toLocaleString() : new Date(timestamp).toLocaleString()
-        const photoHtml = payload.photo_url ? `<img src="${payload.photo_url}" alt="foto" class="mx-auto rounded-full w-20 h-20 mb-3 object-cover"/>` : ''
+        const photoHtml = payload.photo_url ? `<img src="${escapeHtml(payload.photo_url)}" alt="foto" class="mx-auto rounded-full w-20 h-20 mb-3 object-cover"/>` : ''
         Swal.fire({
           title: 'Asistencia confirmada',
-          html: `<div class="text-center">${photoHtml}<div class="text-left"><strong>Nombre:</strong> ${payload.nombre}<br/><strong>Hora:</strong> ${serverTime}</div></div>`,
+          html: `<div class="text-center">${photoHtml}<div class="text-left"><strong>Nombre:</strong> ${escapeHtml(payload.nombre)}<br/><strong>Hora:</strong> ${escapeHtml(serverTime)}</div></div>`,
           icon: 'success',
           background: '#041527',
           color: '#cfeeff',
@@ -125,13 +157,11 @@ async function onScanSuccess(decodedText, decodedResult) {
     }
   } catch (err) {
     setStatus('error red')
-    toastError('Error de red: ' + err.message)
+    toastError(err.message || 'No se pudo registrar la asistencia.')
   }
 
   // recreate scanner after short delay
-  setTimeout(() => {
-    createScanner()
-  }, 1200)
+  await restartScanner()
 }
 
 function onScanError(errorMessage) {
