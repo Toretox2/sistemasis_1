@@ -1,5 +1,10 @@
 // Scanner UI logic using Html5QrcodeScanner and SweetAlert2 for toasts
-const LOG_ENDPOINT = window.LOG_ENDPOINT || '/api/log_attendance'
+const hasSupabaseConfig = typeof window.isSupabaseClientConfigValid === 'function'
+  ? window.isSupabaseClientConfigValid()
+  : Boolean(window.SUPABASE_URL && window.SUPABASE_ANON_KEY)
+const supabaseClient = window.supabase && hasSupabaseConfig
+  ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+  : null
 
 const startBtn = document.getElementById('startBtn')
 const stopBtn = document.getElementById('stopBtn')
@@ -40,13 +45,6 @@ function toastError(title) {
     background: '#2b0f11',
     color: '#ffdede'
   })
-}
-
-function getBackendError(response, payload, text) {
-  if (response.status === 500 && /misconfigured/i.test(payload?.error || text || '')) {
-    return 'El backend no está configurado. Define SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Cloudflare.'
-  }
-  return payload?.error || text || `HTTP ${response.status}`
 }
 
 function createScanner() {
@@ -93,22 +91,18 @@ async function onScanSuccess(decodedText, decodedResult) {
   }
 
   try {
-    if (!LOG_ENDPOINT || !/^https?:\/\//.test(LOG_ENDPOINT) && !LOG_ENDPOINT.startsWith('/')) {
-      throw new Error('LOG_ENDPOINT no está configurado correctamente')
+    if (!supabaseClient) {
+      throw new Error('Supabase no está configurado. Revisa SUPABASE_URL y la anon public key.')
     }
 
-    const res = await fetch(LOG_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: decodedText, device_info, timestamp })
+    const { data: payload, error } = await supabaseClient.rpc('log_attendance_by_token', {
+      p_token: decodedText,
+      p_device_info: device_info
     })
 
-    const text = await res.text()
-    let payload = null
-    try { payload = JSON.parse(text) } catch (e) { payload = { result: text } }
-    if (!res.ok) {
+    if (error) {
       setStatus('error')
-      toastError(getBackendError(res, payload, text))
+      toastError('Error registrando: ' + error.message)
     } else {
       setStatus('registrado')
       // If server returned user name, show a richer modal

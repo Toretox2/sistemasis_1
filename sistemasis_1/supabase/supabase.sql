@@ -78,6 +78,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- El escáner usa sólo la anon public key desde el navegador.
+-- No otorgar service_role al frontend.
+ALTER FUNCTION public.log_attendance_by_token(text, text) SET search_path = public;
+REVOKE EXECUTE ON FUNCTION public.log_attendance_by_token(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.log_attendance_by_token(text, text) TO anon, authenticated;
+
 -- IMPORTANTE: La función `log_attendance_by_token` tiene `SECURITY DEFINER` y
 -- se ejecuta con los privilegios del owner. Debe exponerla sólo desde
 -- un endpoint seguro (Edge Function) que use la `service_role` key o que

@@ -46,5 +46,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Grant execute to authenticated role if needed (optional)
--- GRANT EXECUTE ON FUNCTION public.log_attendance_by_token(text, text) TO authenticated;
+-- El escáner usa la anon public key desde el navegador.
+-- Mantener la función con search_path fijo y sin ejecución pública implícita.
+ALTER FUNCTION public.log_attendance_by_token(text, text) SET search_path = public;
+REVOKE EXECUTE ON FUNCTION public.log_attendance_by_token(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.log_attendance_by_token(text, text) TO anon, authenticated;
