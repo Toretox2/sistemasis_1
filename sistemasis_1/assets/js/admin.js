@@ -162,17 +162,21 @@
 
         return `
           <tr>
-            <td class="px-4 py-3 align-top">${fmt(log.timestamp)}</td>
-            <td class="px-4 py-3 align-top flex items-center gap-3">
-              ${photo}
-              <div>
-                <div class="font-medium">${escapeHtml(log.nombre || '')}</div>
-                <div class="text-slate-400 text-xs">${escapeHtml(log.user_id || '')}</div>
+            <td class="px-4 py-3 align-middle whitespace-nowrap">${fmt(log.timestamp)}</td>
+            <td class="px-4 py-3 align-middle">
+              <div class="flex min-w-0 items-center gap-3">
+                ${photo}
+                <div class="min-w-0">
+                  <div class="font-medium truncate">${escapeHtml(log.nombre || '')}</div>
+                  <div class="max-w-[12rem] truncate text-xs text-slate-400" title="${escapeHtml(log.user_id || '')}">${escapeHtml(log.user_id || '')}</div>
+                </div>
               </div>
             </td>
-            <td class="px-4 py-3 align-top">${escapeHtml(log.device_info || '')}</td>
-            <td class="px-4 py-3 align-top">${escapeHtml(log.tipo_registro || 'entrada')}</td>
-            <td class="px-4 py-3 align-top">
+            <td class="px-4 py-3 align-middle">
+              <div class="max-w-xs truncate text-slate-600" title="${escapeHtml(log.device_info || '')}">${escapeHtml(log.device_info || '')}</div>
+            </td>
+            <td class="px-4 py-3 align-middle whitespace-nowrap">${escapeHtml(log.tipo_registro || 'entrada')}</td>
+            <td class="px-4 py-3 align-middle whitespace-nowrap">
               <button data-id="${log.id}" class="px-3 py-1 bg-slate-700 rounded text-sm hover:bg-slate-600 transition">Ver</button>
             </td>
           </tr>
