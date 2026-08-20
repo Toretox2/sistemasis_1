@@ -148,6 +148,7 @@
 
   function renderTable() {
     const rows = logsCache || [];
+    const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="32" fill="%23e2e8f0"/%3E%3Ccircle cx="32" cy="25" r="11" fill="%2394a3b8"/%3E%3Cpath d="M13 55c2-12 11-18 19-18s17 6 19 18" fill="%2394a3b8"/%3E%3C/svg%3E';
     if (!rows.length) {
       el.logsBody.innerHTML = `
         <tr>
@@ -156,9 +157,8 @@
       `;
     } else {
       el.logsBody.innerHTML = rows.map((log) => {
-        const photo = log.photo_url
-          ? `<img src="${log.photo_url}" class="w-8 h-8 rounded-full object-cover" alt="foto" />`
-          : `<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">U</div>`;
+        const photoUrl = String(log.photo_url || '').trim() || defaultAvatar;
+        const photo = `<img src="${escapeHtml(photoUrl)}" onerror="this.onerror=null;this.src='${defaultAvatar}'" class="w-8 h-8 rounded-full object-cover" alt="foto de ${escapeHtml(log.nombre || 'usuario')}" />`;
 
         return `
           <tr>
