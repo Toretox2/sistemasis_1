@@ -22,6 +22,11 @@
     kpiToday: document.getElementById('kpi-today'),
     kpiWeek: document.getElementById('kpi-week'),
     kpiUsers: document.getElementById('kpi-users'),
+    kpiDays: document.getElementById('kpi-days'),
+    kpiLate: document.getElementById('kpi-late'),
+    kpiOvertime: document.getElementById('kpi-overtime'),
+    kpiHours: document.getElementById('kpi-hours'),
+    kpiDiscount: document.getElementById('kpi-discount'),
     logsBody: document.getElementById('logs-body'),
     searchName: document.getElementById('search-name'),
     dateStart: document.getElementById('date-start'),
@@ -38,6 +43,11 @@
     el.kpiToday.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
     el.kpiWeek.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
     el.kpiUsers.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
+    el.kpiDays.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
+    el.kpiLate.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
+    el.kpiOvertime.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
+    el.kpiHours.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
+    el.kpiDiscount.innerHTML = '<div class="skeleton h-10 w-20 rounded-lg"></div>';
     el.logsBody.innerHTML = Array.from({ length: 6 }).map(() => `
       <tr>
         <td class="px-4 py-3"><div class="skeleton h-6 w-32 rounded"></div></td>
@@ -67,6 +77,23 @@
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;');
+  }
+
+  function statusBadge(status) {
+    const styles = {
+      retardo: 'badge badge-warning',
+      hora_extra: 'badge badge-success',
+      salida_a_tiempo: 'badge badge-neutral',
+      a_tiempo: 'badge badge-success'
+    };
+    const labels = {
+      retardo: 'Retardo',
+      hora_extra: 'Hora extra',
+      salida_a_tiempo: 'Salida a tiempo',
+      a_tiempo: 'A tiempo'
+    };
+    const key = labels[status] ? status : 'a_tiempo';
+    return `<span class="${styles[key]}">${labels[key]}</span>`;
   }
 
   async function fetchLogs({ startIso = null, endIso = null, search = null } = {}) {
@@ -171,7 +198,10 @@
                 </div>
               </div>
             </td>
-            <td class="px-4 py-3 align-middle whitespace-nowrap">${escapeHtml(log.tipo_registro || 'entrada')}</td>
+            <td class="px-4 py-3 align-middle whitespace-nowrap">
+              <div class="text-xs uppercase tracking-wide text-slate-400">${escapeHtml(log.tipo_registro || 'entrada')}</div>
+              ${statusBadge(log.attendance_status)}
+            </td>
             <td class="px-4 py-3 align-middle whitespace-nowrap">
               <button data-id="${log.id}" class="px-3 py-1 bg-slate-700 rounded text-sm hover:bg-slate-600 transition">Ver</button>
             </td>
@@ -191,19 +221,28 @@
       const todayEnd = dayjs().endOf('day').toISOString();
       const weekStart = dayjs().startOf('week').toISOString();
 
+      const startDate = el.dateStart.value || dayjs().startOf('month').format('YYYY-MM-DD');
+      const endDate = el.dateEnd.value || dayjs().format('YYYY-MM-DD');
       const promises = [
         supabaseClient.from(config.attendanceTable).select('id, user_id, timestamp, device_info', { head: true, count: 'exact' }).gte('timestamp', todayStart).lte('timestamp', todayEnd),
         supabaseClient.from(config.attendanceTable).select('id, user_id, timestamp, device_info', { head: true, count: 'exact' }).gte('timestamp', weekStart),
-        supabaseClient.from('users').select('id', { head: true, count: 'exact' })
+        supabaseClient.from('users').select('id', { head: true, count: 'exact' }),
+        supabaseClient.rpc('get_attendance_metrics', { p_start: startDate, p_end: endDate })
       ];
 
-      const [todayResult, weekResult, usersResult] = await Promise.all(promises);
-      [todayResult, weekResult, usersResult].forEach((result) => {
+      const [todayResult, weekResult, usersResult, metricsResult] = await Promise.all(promises);
+      [todayResult, weekResult, usersResult, metricsResult].forEach((result) => {
         if (result.error) console.error('Supabase attendance query error', result.error);
       });
       el.kpiToday.textContent = String(todayResult.count || 0);
       el.kpiWeek.textContent = String(weekResult.count || 0);
       el.kpiUsers.textContent = String(usersResult.count || 0);
+      const metrics = metricsResult.data || {};
+      el.kpiDays.textContent = String(metrics.days_worked || 0);
+      el.kpiLate.textContent = `${metrics.late_minutes || 0} min`;
+      el.kpiOvertime.textContent = `${metrics.overtime_minutes || 0} min`;
+      el.kpiHours.textContent = `${((metrics.effective_minutes || 0) / 60).toFixed(1)} h`;
+      el.kpiDiscount.textContent = `$${Number(metrics.discount_total || 0).toFixed(2)}`;
     } catch (error) {
       console.error('updateKPIs', error);
     }

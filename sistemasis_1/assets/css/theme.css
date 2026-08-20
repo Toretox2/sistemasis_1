@@ -75,6 +75,45 @@ body {
   border-radius: 0.75rem;
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge-success {
+  color: #6ee7b7;
+  background: #064e3b;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+}
+
+.badge-warning {
+  color: #fcd34d;
+  background: #78350f;
+  border: 1px solid rgba(251, 191, 36, 0.22);
+}
+
+.badge-neutral {
+  color: #cbd5e1;
+  background: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+#logs-body tr {
+  transition: background-color 0.15s ease;
+}
+
+#logs-body tr:hover {
+  background: rgba(30, 41, 59, 0.62);
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

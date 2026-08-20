@@ -150,9 +150,15 @@ async function onScanSuccess(decodedText, decodedResult) {
       if (payload?.nombre) {
         const serverTime = payload.created_at ? new Date(payload.created_at).toLocaleString() : new Date(timestamp).toLocaleString()
         const photoHtml = payload.photo_url ? `<img src="${escapeHtml(payload.photo_url)}" alt="foto" class="mx-auto rounded-full w-20 h-20 mb-3 object-cover"/>` : ''
+        let statusText = 'Registro a tiempo'
+        if (payload.attendance_status === 'retardo') {
+          statusText = `Retardo: ${payload.late_minutes || 0} min`
+        } else if (payload.attendance_status === 'hora_extra') {
+          statusText = `Hora extra: ${payload.overtime_minutes || 0} min`
+        }
         Swal.fire({
           title: 'Asistencia confirmada',
-          html: `<div class="text-center">${photoHtml}<div class="text-left"><strong>Nombre:</strong> ${escapeHtml(payload.nombre)}<br/><strong>Hora:</strong> ${escapeHtml(serverTime)}</div></div>`,
+          html: `<div class="text-center">${photoHtml}<div class="text-left"><strong>Nombre:</strong> ${escapeHtml(payload.nombre)}<br/><strong>Hora:</strong> ${escapeHtml(serverTime)}<br/><strong>Estado:</strong> ${escapeHtml(statusText)}</div></div>`,
           icon: 'success',
           background: '#041527',
           color: '#cfeeff',

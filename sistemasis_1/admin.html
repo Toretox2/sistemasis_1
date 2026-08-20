@@ -29,19 +29,19 @@
     .kpi-card:hover { transform: translateY(-4px); }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen">
   <div class="flex">
-    <aside class="w-64 bg-white border-r border-slate-200 min-h-screen p-4 shadow-sm">
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 min-h-screen p-4 shadow-sm">
       <div class="mb-8">
-        <h1 class="text-xl font-semibold text-slate-800">Asistencia QR</h1>
-        <p class="text-sm text-slate-500 mt-1">Panel administrativo</p>
+        <h1 class="text-xl font-semibold text-white">Asistencia QR</h1>
+        <p class="text-sm text-slate-400 mt-1">Control de personal</p>
       </div>
       <nav class="space-y-2">
-        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 transition text-slate-700">
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md bg-slate-800 hover:bg-slate-700 transition text-slate-100">
           <span class="w-2 h-2 bg-primary-600 rounded-full"></span>
           <span>Dashboard</span>
         </a>
-        <a href="scanner.html" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 transition text-slate-700">
+        <a href="scanner.html" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 transition text-slate-300">
           <span>Escáner</span>
         </a>
       </nav>
@@ -50,55 +50,64 @@
     <main class="flex-1 p-6">
       <header class="mb-6 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
-          <p class="text-sm text-slate-500">Resumen de asistencias y listado</p>
+          <h2 class="text-2xl font-bold text-white">Dashboard operativo</h2>
+          <p class="text-sm text-slate-400">Resumen de jornada y control de personal</p>
         </div>
         <div class="flex items-center gap-3">
-          <div class="text-slate-600 text-sm">Conectado a: <span id="supabase-url" class="font-mono text-xs text-slate-800"></span></div>
-          <button id="logout-btn" class="inline-flex items-center px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition">Salir</button>
+          <div class="text-slate-400 text-sm">Conectado a: <span id="supabase-url" class="font-mono text-xs text-slate-300"></span></div>
+          <button id="logout-btn" class="inline-flex items-center px-3 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Salir</button>
         </div>
       </header>
 
-      <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <div class="text-sm text-slate-500">Asistencias hoy</div>
-          <div id="kpi-today" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="kpi-card bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-800">
+          <div class="text-sm text-slate-400">Asistencias hoy</div>
+          <div id="kpi-today" class="text-2xl font-semibold mt-2 text-white">—</div>
         </div>
-        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <div class="text-sm text-slate-500">Asistencias (7 días)</div>
-          <div id="kpi-week" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+        <div class="kpi-card bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-800">
+          <div class="text-sm text-slate-400">Días laborados</div>
+          <div id="kpi-days" class="text-2xl font-semibold mt-2 text-white">—</div>
         </div>
-        <div class="kpi-card bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <div class="text-sm text-slate-500">Usuarios totales</div>
-          <div id="kpi-users" class="text-2xl font-semibold mt-2 text-slate-800">—</div>
+        <div class="kpi-card bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-800">
+          <div class="text-sm text-slate-400">Retardos acumulados</div>
+          <div id="kpi-late" class="text-2xl font-semibold mt-2 text-amber-400">—</div>
+        </div>
+        <div class="kpi-card bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-800">
+          <div class="text-sm text-slate-400">Horas extra</div>
+          <div id="kpi-overtime" class="text-2xl font-semibold mt-2 text-emerald-400">—</div>
+        </div>
+        <div class="kpi-card bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-800 lg:col-span-4 grid sm:grid-cols-2 gap-4">
+          <div><div class="text-sm text-slate-400">Asistencias últimos 7 días</div><div id="kpi-week" class="text-xl font-semibold mt-2 text-slate-100">—</div></div>
+          <div><div class="text-sm text-slate-400">Horas efectivas</div><div id="kpi-hours" class="text-xl font-semibold mt-2 text-cyan-300">—</div></div>
+          <div><div class="text-sm text-slate-400">Descuento acumulado</div><div id="kpi-discount" class="text-xl font-semibold mt-2 text-rose-400">—</div></div>
         </div>
       </section>
 
-      <section class="bg-white p-4 rounded-xl mb-6 border border-slate-200 shadow-sm">
+      <section class="bg-slate-900 p-4 rounded-xl mb-6 border border-slate-800 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-end gap-4">
           <div class="flex-1">
-            <label for="search-name" class="text-sm text-slate-600">Buscar por nombre</label>
-            <input id="search-name" type="search" placeholder="Buscar usuario..." class="mt-1 w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <label for="search-name" class="text-sm text-slate-400">Buscar por nombre</label>
+            <input id="search-name" type="search" placeholder="Buscar usuario..." class="mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
           <div>
-            <label for="date-start" class="text-sm text-slate-600">Fecha inicio</label>
-            <input id="date-start" type="date" class="mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <label for="date-start" class="text-sm text-slate-400">Fecha inicio</label>
+            <input id="date-start" type="date" class="mt-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
           <div>
-            <label for="date-end" class="text-sm text-slate-600">Fecha fin</label>
-            <input id="date-end" type="date" class="mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <label for="date-end" class="text-sm text-slate-400">Fecha fin</label>
+            <input id="date-end" type="date" class="mt-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
           <div class="flex items-center gap-2">
             <button id="btn-apply" class="ml-auto inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow-sm hover:bg-primary-500 transition">Aplicar</button>
-            <button id="btn-reset" class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg shadow-sm hover:bg-slate-200 transition">Reset</button>
+            <button id="btn-reset" class="inline-flex items-center px-4 py-2 bg-slate-800 text-slate-300 rounded-lg shadow-sm hover:bg-slate-700 transition">Reset</button>
           </div>
         </div>
       </section>
 
-      <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <section class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-sm">
         <div class="overflow-x-auto">
-          <table class="min-w-full w-full table-fixed text-left divide-y divide-slate-200">
-            <thead class="text-slate-600 text-sm">
+          <table class="min-w-full w-full table-fixed text-left divide-y divide-slate-800">
+            <thead class="text-slate-400 text-sm uppercase tracking-wide">
               <tr>
                 <th class="px-4 py-3 align-middle whitespace-nowrap">Fecha / Hora</th>
                 <th class="px-4 py-3 align-middle">Usuario</th>
@@ -106,19 +115,19 @@
                 <th class="px-4 py-3 align-middle whitespace-nowrap">Acciones</th>
               </tr>
             </thead>
-            <tbody id="logs-body" class="divide-y divide-slate-200 bg-slate-50 text-sm"></tbody>
+            <tbody id="logs-body" class="divide-y divide-slate-800 bg-slate-950 text-sm"></tbody>
           </table>
         </div>
 
         <div class="mt-4 flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <button id="pagination-prev" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">Anterior</button>
-            <button id="pagination-next" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">Siguiente</button>
-            <div id="page-info" class="text-sm text-slate-500 ml-3">Página 1</div>
+            <button id="pagination-prev" class="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition">Anterior</button>
+            <button id="pagination-next" class="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition">Siguiente</button>
+            <div id="page-info" class="text-sm text-slate-400 ml-3">Página 1</div>
           </div>
           <div class="flex items-center gap-2">
-            <label for="page-size" class="text-sm text-slate-600">Tamaño</label>
-            <select id="page-size" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-800">
+            <label for="page-size" class="text-sm text-slate-400">Tamaño</label>
+            <select id="page-size" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-100">
               <option value="10">10</option>
               <option value="25" selected>25</option>
               <option value="50">50</option>

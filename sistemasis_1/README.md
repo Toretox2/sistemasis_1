@@ -198,6 +198,18 @@ El flujo de asistencia conserva el esquema Supabase actual (`users` y `attendanc
 
 Para activar estas funciones en un proyecto existente, ejecuta la migración `supabase/migrations/2026-08-19_metacom_features.sql` después de las migraciones anteriores. El escáner muestra el tipo elegido y el panel lo incluye en el listado.
 
+La política horaria se configura en `public.attendance_policy`. Ejemplo:
+
+```sql
+UPDATE public.attendance_policy
+SET workday_start = '08:00:00',
+	workday_end = '17:00:00',
+	grace_minutes = 10,
+	hourly_discount = 25.00,
+	updated_at = now()
+WHERE id = true;
+```
+
 1. En Supabase, ejecuta las migraciones de `supabase/migrations/` desde el SQL Editor.
 2. En Authentication > Users, crea el usuario o usuarios administrativos con correo y contraseña.
 3. En `assets/js/config.js`, configura únicamente los valores públicos:
