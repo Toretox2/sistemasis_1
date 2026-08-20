@@ -42,7 +42,6 @@
       <tr>
         <td class="px-4 py-3"><div class="skeleton h-6 w-32 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-6 w-48 rounded"></div></td>
-        <td class="px-4 py-3"><div class="skeleton h-6 w-28 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-6 w-20 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-8 w-16 rounded"></div></td>
       </tr>
@@ -152,7 +151,7 @@
     if (!rows.length) {
       el.logsBody.innerHTML = `
         <tr>
-          <td colspan="5" class="px-4 py-6 text-center text-slate-400">Sin resultados</td>
+          <td colspan="4" class="px-4 py-6 text-center text-slate-400">Sin resultados</td>
         </tr>
       `;
     } else {
@@ -171,9 +170,6 @@
                   <div class="max-w-[12rem] truncate text-xs text-slate-400" title="${escapeHtml(log.user_id || '')}">${escapeHtml(log.user_id || '')}</div>
                 </div>
               </div>
-            </td>
-            <td class="px-4 py-3 align-middle">
-              <div class="max-w-xs truncate text-slate-600" title="${escapeHtml(log.device_info || '')}">${escapeHtml(log.device_info || '')}</div>
             </td>
             <td class="px-4 py-3 align-middle whitespace-nowrap">${escapeHtml(log.tipo_registro || 'entrada')}</td>
             <td class="px-4 py-3 align-middle whitespace-nowrap">
