@@ -128,11 +128,17 @@ async function onScanSuccess(decodedText, decodedResult) {
     }
 
     const { data: payload, error } = await supabaseClient.rpc('log_attendance_by_token', {
-      p_token: decodedText,
+      p_token: token,
       p_device_info: device_info
     })
 
     if (error) {
+      console.error('Supabase RPC log_attendance_by_token failed', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       setStatus('error')
       toastError(getRpcErrorMessage(error))
     } else {
@@ -156,6 +162,7 @@ async function onScanSuccess(decodedText, decodedResult) {
       }
     }
   } catch (err) {
+    console.error('Attendance registration failed', err)
     setStatus('error red')
     toastError(err.message || 'No se pudo registrar la asistencia.')
   }

@@ -38,7 +38,7 @@ CREATE POLICY "Service role manage users" ON public.users
 -- Policy para attendance_logs: permitir INSERT si el user_id ya existe
 CREATE POLICY "Allow insert if user exists" ON public.attendance_logs
   FOR INSERT
-  WITH CHECK ( EXISTS ( SELECT 1 FROM public.users u WHERE u.id = user_id ) );
+  WITH CHECK ( EXISTS ( SELECT 1 FROM public.users u WHERE u.id = public.attendance_logs.user_id ) );
 
 -- Policy para lectura de logs: permitir a usuarios autenticados ver sus propios logs
 CREATE POLICY "Allow users read their logs" ON public.attendance_logs
