@@ -12,7 +12,12 @@ CREATE TABLE IF NOT EXISTS public.attendance_policy (
 
 INSERT INTO public.attendance_policy (id)
 VALUES (true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  workday_start = COALESCE(public.attendance_policy.workday_start, '08:00:00'),
+  workday_end = COALESCE(public.attendance_policy.workday_end, '17:00:00'),
+  grace_minutes = COALESCE(public.attendance_policy.grace_minutes, 0),
+  hourly_discount = COALESCE(public.attendance_policy.hourly_discount, 0),
+  updated_at = now();
 
 ALTER TABLE public.attendance_logs
   ADD COLUMN IF NOT EXISTS work_date date,
@@ -30,6 +35,22 @@ ALTER TABLE public.attendance_logs
 UPDATE public.attendance_logs
 SET work_date = (timestamp AT TIME ZONE 'UTC')::date
 WHERE work_date IS NULL;
+
+UPDATE public.attendance_logs
+SET late_minutes = COALESCE(late_minutes, 0),
+    overtime_minutes = COALESCE(overtime_minutes, 0),
+    discount_amount = COALESCE(discount_amount, 0),
+    attendance_status = COALESCE(attendance_status, 'a_tiempo')
+WHERE late_minutes IS NULL
+   OR overtime_minutes IS NULL
+   OR discount_amount IS NULL
+   OR attendance_status IS NULL;
+
+ALTER TABLE public.attendance_logs
+  ALTER COLUMN late_minutes SET DEFAULT 0,
+  ALTER COLUMN overtime_minutes SET DEFAULT 0,
+  ALTER COLUMN discount_amount SET DEFAULT 0,
+  ALTER COLUMN attendance_status SET DEFAULT 'a_tiempo';
 
 ALTER TABLE public.attendance_logs
   ALTER COLUMN work_date SET DEFAULT ((now() AT TIME ZONE 'UTC')::date);
@@ -78,11 +99,11 @@ BEGIN
   END IF;
 
   IF normalized_type = 'entrada' THEN
-    late_value := GREATEST(0, FLOOR(EXTRACT(EPOCH FROM ((event_timestamp AT TIME ZONE 'UTC')::time - policy_row.workday_start)) / 60)::integer - policy_row.grace_minutes);
-    discount_value := ROUND((late_value::numeric / 60) * policy_row.hourly_discount, 2);
+    late_value := GREATEST(0, FLOOR(EXTRACT(EPOCH FROM ((event_timestamp AT TIME ZONE 'UTC')::time - COALESCE(policy_row.workday_start, '08:00:00'::time))) / 60)::integer - COALESCE(policy_row.grace_minutes, 0));
+    discount_value := COALESCE(ROUND((late_value::numeric / 60) * COALESCE(policy_row.hourly_discount, 0), 2), 0);
     IF late_value > 0 THEN status_value := 'retardo'; END IF;
   ELSE
-    overtime_value := GREATEST(0, FLOOR(EXTRACT(EPOCH FROM ((event_timestamp AT TIME ZONE 'UTC')::time - policy_row.workday_end)) / 60)::integer);
+    overtime_value := GREATEST(0, FLOOR(EXTRACT(EPOCH FROM ((event_timestamp AT TIME ZONE 'UTC')::time - COALESCE(policy_row.workday_end, '17:00:00'::time))) / 60)::integer);
     IF overtime_value > 0 THEN status_value := 'hora_extra'; ELSE status_value := 'salida_a_tiempo'; END IF;
   END IF;
 

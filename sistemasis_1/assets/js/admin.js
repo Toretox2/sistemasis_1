@@ -48,7 +48,22 @@
     ,employeeModalClose: document.getElementById('employee-modal-close')
   };
 
+  const requiredElements = [
+    'kpiToday', 'kpiWeek', 'kpiUsers', 'kpiDays', 'kpiLate', 'kpiOvertime',
+    'kpiHours', 'kpiDiscount', 'logsBody', 'searchName', 'dateStart', 'dateEnd',
+    'btnApply', 'btnReset', 'pageInfo', 'paginationPrev', 'paginationNext', 'pageSize',
+    'datePreset', 'userFilter', 'statusFilter', 'btnExport', 'employeeModal',
+    'employeeModalTitle', 'employeeModalSubtitle', 'employeeModalContent', 'employeeModalClose'
+  ];
+  const missingElements = requiredElements.filter((key) => !el[key]);
+  const isAdminView = missingElements.length === 0;
+
+  if (!isAdminView) {
+    console.warn('Admin dashboard not initialized. Missing elements:', missingElements);
+  }
+
   function renderSkeletons() {
+    if (!isAdminView) return;
     el.kpiToday.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
     el.kpiWeek.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
     el.kpiUsers.innerHTML = '<div class="skeleton h-10 w-16 rounded-lg"></div>';
@@ -323,6 +338,7 @@
   }
 
   async function init() {
+    if (!isAdminView) return;
     renderSkeletons();
     el.dateStart.value = dayjs().startOf('month').format('YYYY-MM-DD');
     el.dateEnd.value = dayjs().format('YYYY-MM-DD');
