@@ -6,7 +6,8 @@
   const config = {
     supabaseUrl: window.SUPABASE_URL || '',
     supabaseAnonKey: window.SUPABASE_ANON_KEY || '',
-    adminEndpoint: window.ADMIN_ENDPOINT || ''
+    adminEndpoint: window.ADMIN_ENDPOINT || '',
+    attendanceTable: 'attendance_logs'
   };
 
   if (!config.supabaseUrl || !config.supabaseAnonKey) {
@@ -42,6 +43,7 @@
         <td class="px-4 py-3"><div class="skeleton h-6 w-32 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-6 w-48 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-6 w-28 rounded"></div></td>
+        <td class="px-4 py-3"><div class="skeleton h-6 w-20 rounded"></div></td>
         <td class="px-4 py-3"><div class="skeleton h-8 w-16 rounded"></div></td>
       </tr>
     `).join('');
@@ -149,7 +151,7 @@
     if (!rows.length) {
       el.logsBody.innerHTML = `
         <tr>
-          <td colspan="4" class="px-4 py-6 text-center text-slate-400">Sin resultados</td>
+          <td colspan="5" class="px-4 py-6 text-center text-slate-400">Sin resultados</td>
         </tr>
       `;
     } else {
@@ -169,6 +171,7 @@
               </div>
             </td>
             <td class="px-4 py-3 align-top">${escapeHtml(log.device_info || '')}</td>
+            <td class="px-4 py-3 align-top">${escapeHtml(log.tipo_registro || 'entrada')}</td>
             <td class="px-4 py-3 align-top">
               <button data-id="${log.id}" class="px-3 py-1 bg-slate-700 rounded text-sm hover:bg-slate-600 transition">Ver</button>
             </td>
@@ -189,12 +192,15 @@
       const weekStart = dayjs().startOf('week').toISOString();
 
       const promises = [
-        supabaseClient.from('attendance_logs').select('id', { head: true, count: 'exact' }).gte('timestamp', todayStart).lte('timestamp', todayEnd),
-        supabaseClient.from('attendance_logs').select('id', { head: true, count: 'exact' }).gte('timestamp', weekStart),
+        supabaseClient.from(config.attendanceTable).select('id, user_id, timestamp, device_info', { head: true, count: 'exact' }).gte('timestamp', todayStart).lte('timestamp', todayEnd),
+        supabaseClient.from(config.attendanceTable).select('id, user_id, timestamp, device_info', { head: true, count: 'exact' }).gte('timestamp', weekStart),
         supabaseClient.from('users').select('id', { head: true, count: 'exact' })
       ];
 
       const [todayResult, weekResult, usersResult] = await Promise.all(promises);
+      [todayResult, weekResult, usersResult].forEach((result) => {
+        if (result.error) console.error('Supabase attendance query error', result.error);
+      });
       el.kpiToday.textContent = String(todayResult.count || 0);
       el.kpiWeek.textContent = String(weekResult.count || 0);
       el.kpiUsers.textContent = String(usersResult.count || 0);

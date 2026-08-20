@@ -194,6 +194,10 @@ Ambos scripts envían una petición POST a `SUPABASE_URL/rest/v1/rpc/log_attenda
 
 ## Configuración de producción
 
+El flujo de asistencia conserva el esquema Supabase actual (`users` y `attendance_logs`) y añade el patrón operativo de METACOM: cada lectura se registra como `entrada` o `salida`, y se rechaza el mismo tipo repetido para el mismo usuario durante el día.
+
+Para activar estas funciones en un proyecto existente, ejecuta la migración `supabase/migrations/2026-08-19_metacom_features.sql` después de las migraciones anteriores. El escáner muestra el tipo elegido y el panel lo incluye en el listado.
+
 1. En Supabase, ejecuta las migraciones de `supabase/migrations/` desde el SQL Editor.
 2. En Authentication > Users, crea el usuario o usuarios administrativos con correo y contraseña.
 3. En `assets/js/config.js`, configura únicamente los valores públicos:

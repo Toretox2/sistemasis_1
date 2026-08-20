@@ -10,6 +10,7 @@ const startBtn = document.getElementById('startBtn')
 const stopBtn = document.getElementById('stopBtn')
 const statusEl = document.getElementById('status')
 const messageEl = document.getElementById('message')
+const recordTypeEl = document.getElementById('record-type')
 const readerElId = 'reader'
 
 let html5QrcodeScanner = null
@@ -111,6 +112,7 @@ async function onScanSuccess(decodedText, decodedResult) {
   setStatus('token detectado')
   const timestamp = new Date().toISOString()
   const device_info = navigator.userAgent
+  const recordType = recordTypeEl?.value === 'salida' ? 'salida' : 'entrada'
 
   // stop scanner UI while processing
   try {
@@ -129,7 +131,8 @@ async function onScanSuccess(decodedText, decodedResult) {
 
     const { data: payload, error } = await supabaseClient.rpc('log_attendance_by_token', {
       p_token: token,
-      p_device_info: device_info
+      p_device_info: device_info,
+      p_tipo_registro: recordType
     })
 
     if (error) {
