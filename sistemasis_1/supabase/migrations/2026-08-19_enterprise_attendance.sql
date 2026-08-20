@@ -186,3 +186,38 @@ REVOKE EXECUTE ON FUNCTION public.log_attendance_by_token(text, text, text) FROM
 GRANT EXECUTE ON FUNCTION public.log_attendance_by_token(text, text, text) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_attendance_metrics(date, date) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_attendance_logs(timestamptz, timestamptz, text, int, int) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.get_attendance_logs(
+  p_start timestamptz DEFAULT null,
+  p_end timestamptz DEFAULT null,
+  p_search text DEFAULT null,
+  p_user_id uuid DEFAULT null,
+  p_status text DEFAULT null,
+  p_limit int DEFAULT 50,
+  p_offset int DEFAULT 0
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SET search_path = public
+AS $$
+WITH filtered_all AS (
+  SELECT al.id, al.user_id, u.nombre, u.photo_url, al.timestamp, al.tipo_registro,
+    al.attendance_status, al.late_minutes, al.overtime_minutes, al.discount_amount
+  FROM public.attendance_logs AS al
+  JOIN public.users AS u ON u.id = al.user_id
+  WHERE (p_start IS NULL OR al.timestamp >= p_start)
+    AND (p_end IS NULL OR al.timestamp <= p_end)
+    AND (p_search IS NULL OR u.nombre ILIKE ('%' || p_search || '%') OR u.id::text ILIKE ('%' || p_search || '%'))
+    AND (p_user_id IS NULL OR al.user_id = p_user_id)
+    AND (p_status IS NULL OR al.attendance_status = p_status)
+), logs_page AS (
+  SELECT * FROM filtered_all ORDER BY timestamp DESC LIMIT GREATEST(p_limit, 1) OFFSET GREATEST(p_offset, 0)
+)
+SELECT jsonb_build_object(
+  'logs', COALESCE((SELECT jsonb_agg(row_to_json(log_row)) FROM (SELECT * FROM logs_page) AS log_row), '[]'::jsonb),
+  'total', (SELECT count(*) FROM filtered_all)
+);
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_attendance_logs(timestamptz, timestamptz, text, uuid, text, int, int) TO authenticated;

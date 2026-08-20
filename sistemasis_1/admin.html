@@ -85,9 +85,23 @@
 
       <section class="bg-slate-900 p-4 rounded-xl mb-6 border border-slate-800 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div>
+            <label for="date-preset" class="text-sm text-slate-400">Periodo</label>
+            <select id="date-preset" class="mt-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+              <option value="month">Este mes</option><option value="week">Esta semana</option><option value="today">Hoy</option><option value="custom">Personalizado</option>
+            </select>
+          </div>
           <div class="flex-1">
             <label for="search-name" class="text-sm text-slate-400">Buscar por nombre</label>
             <input id="search-name" type="search" placeholder="Buscar usuario..." class="mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div>
+            <label for="user-filter" class="text-sm text-slate-400">Trabajador</label>
+            <select id="user-filter" class="mt-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"><option value="">Todos</option></select>
+          </div>
+          <div>
+            <label for="status-filter" class="text-sm text-slate-400">Estado</label>
+            <select id="status-filter" class="mt-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"><option value="">Todos</option><option value="a_tiempo">A tiempo</option><option value="retardo">Retardo</option><option value="salida_a_tiempo">Salida a tiempo</option><option value="hora_extra">Hora extra</option></select>
           </div>
           <div>
             <label for="date-start" class="text-sm text-slate-400">Fecha inicio</label>
@@ -100,6 +114,7 @@
           <div class="flex items-center gap-2">
             <button id="btn-apply" class="ml-auto inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow-sm hover:bg-primary-500 transition">Aplicar</button>
             <button id="btn-reset" class="inline-flex items-center px-4 py-2 bg-slate-800 text-slate-300 rounded-lg shadow-sm hover:bg-slate-700 transition">Reset</button>
+            <button id="btn-export" class="inline-flex items-center px-4 py-2 bg-emerald-700 text-white rounded-lg shadow-sm hover:bg-emerald-600 transition">CSV</button>
           </div>
         </div>
       </section>
@@ -137,6 +152,13 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <div id="employee-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+    <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <div class="flex items-start justify-between"><div><h3 id="employee-modal-title" class="text-xl font-semibold text-white">Detalle del trabajador</h3><p id="employee-modal-subtitle" class="text-sm text-slate-400"></p></div><button id="employee-modal-close" class="text-slate-400 hover:text-white" aria-label="Cerrar">Cerrar</button></div>
+      <div id="employee-modal-content" class="mt-5 grid grid-cols-2 gap-3"></div>
+    </div>
   </div>
 
   <script src="assets/js/config.js"></script>

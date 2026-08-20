@@ -37,6 +37,15 @@
     paginationPrev: document.getElementById('pagination-prev'),
     paginationNext: document.getElementById('pagination-next'),
     pageSize: document.getElementById('page-size')
+    ,datePreset: document.getElementById('date-preset')
+    ,userFilter: document.getElementById('user-filter')
+    ,statusFilter: document.getElementById('status-filter')
+    ,btnExport: document.getElementById('btn-export')
+    ,employeeModal: document.getElementById('employee-modal')
+    ,employeeModalTitle: document.getElementById('employee-modal-title')
+    ,employeeModalSubtitle: document.getElementById('employee-modal-subtitle')
+    ,employeeModalContent: document.getElementById('employee-modal-content')
+    ,employeeModalClose: document.getElementById('employee-modal-close')
   };
 
   function renderSkeletons() {
@@ -96,12 +105,14 @@
     return `<span class="${styles[key]}">${labels[key]}</span>`;
   }
 
-  async function fetchLogs({ startIso = null, endIso = null, search = null } = {}) {
+  async function fetchLogs({ startIso = null, endIso = null, search = null, userId = null, status = null } = {}) {
     try {
       const params = new URLSearchParams();
       if (startIso) params.set('start', startIso);
       if (endIso) params.set('end', endIso);
       if (search) params.set('search', search);
+      if (userId) params.set('user_id', userId);
+      if (status) params.set('status', status);
       params.set('limit', String(pageSize));
       params.set('offset', String(page * pageSize));
 
@@ -146,6 +157,8 @@
         p_start: startIso || null,
         p_end: endIso || null,
         p_search: search || null,
+        p_user_id: userId || null,
+        p_status: status || null,
         p_limit: pageSize,
         p_offset: page * pageSize
       });
@@ -169,7 +182,39 @@
       console.error('fetchUsers', error);
       return;
     }
+    (data || []).forEach((user) => {
+      const option = document.createElement('option');
+      option.value = user.id;
+      option.textContent = user.nombre;
+      el.userFilter.appendChild(option);
+    });
     return data || [];
+  }
+
+  function getFilters() {
+    return {
+      startIso: el.dateStart.value ? dayjs(el.dateStart.value).startOf('day').toISOString() : null,
+      endIso: el.dateEnd.value ? dayjs(el.dateEnd.value).endOf('day').toISOString() : null,
+      search: el.searchName.value.trim() || null,
+      userId: el.userFilter.value || null,
+      status: el.statusFilter.value || null
+    };
+  }
+
+  function downloadCsv() {
+    const header = ['Fecha/Hora', 'Usuario', 'UUID', 'Tipo', 'Estado'];
+    const rows = logsCache.map((log) => [log.timestamp, log.nombre, log.user_id, log.tipo_registro, log.attendance_status]);
+    const csv = [header, ...rows].map((row) => row.map((value) => `"${String(value || '').replaceAll('"', '""')}"`).join(',')).join('\n');
+    const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob); link.download = `asistencia-${dayjs().format('YYYY-MM-DD')}.csv`; link.click(); URL.revokeObjectURL(link.href);
+  }
+
+  function openEmployeeModal(log) {
+    el.employeeModalTitle.textContent = log.nombre || 'Trabajador';
+    el.employeeModalSubtitle.textContent = log.user_id || '';
+    el.employeeModalContent.innerHTML = [['Registro', fmt(log.timestamp)], ['Tipo', log.tipo_registro || 'entrada'], ['Estado', log.attendance_status || 'a_tiempo'], ['Retardo', `${log.late_minutes || 0} min`], ['Hora extra', `${log.overtime_minutes || 0} min`], ['Descuento', `$${Number(log.discount_amount || 0).toFixed(2)}`]].map(([label, value]) => `<div class="rounded-xl border border-slate-800 bg-slate-950 p-3"><div class="text-xs uppercase text-slate-500">${label}</div><div class="mt-1 text-sm text-slate-100">${escapeHtml(value)}</div></div>`).join('');
+    el.employeeModal.classList.remove('hidden'); el.employeeModal.classList.add('flex');
   }
 
   function renderTable() {
@@ -203,7 +248,7 @@
               ${statusBadge(log.attendance_status)}
             </td>
             <td class="px-4 py-3 align-middle whitespace-nowrap">
-              <button data-id="${log.id}" class="px-3 py-1 bg-slate-700 rounded text-sm hover:bg-slate-600 transition">Ver</button>
+              <button data-id="${log.id}" class="view-employee px-3 py-1 bg-slate-700 rounded text-sm hover:bg-slate-600 transition">Ver</button>
             </td>
           </tr>
         `;
@@ -254,13 +299,15 @@
     const search = el.searchName.value ? el.searchName.value.trim() : null;
 
     page = 0;
-    await fetchLogs({ startIso: start, endIso: end, search });
+    await fetchLogs({ ...getFilters(), startIso: start, endIso: end, search });
     renderTable();
     await updateKPIs();
   }
 
   function resetFilters() {
     el.searchName.value = '';
+    el.userFilter.value = '';
+    el.statusFilter.value = '';
     el.dateStart.value = '';
     el.dateEnd.value = '';
     page = 0;
@@ -277,12 +324,24 @@
 
   async function init() {
     renderSkeletons();
-    el.dateStart.value = dayjs().subtract(6, 'day').format('YYYY-MM-DD');
+    el.dateStart.value = dayjs().startOf('month').format('YYYY-MM-DD');
     el.dateEnd.value = dayjs().format('YYYY-MM-DD');
 
     el.btnApply.addEventListener('click', applyFilters);
     el.btnReset.addEventListener('click', resetFilters);
     el.searchName.addEventListener('input', debounce(applyFilters, 400));
+    el.userFilter.addEventListener('change', applyFilters);
+    el.statusFilter.addEventListener('change', applyFilters);
+    el.datePreset.addEventListener('change', () => {
+      const now = dayjs(); const preset = el.datePreset.value;
+      if (preset === 'today') { el.dateStart.value = now.format('YYYY-MM-DD'); el.dateEnd.value = now.format('YYYY-MM-DD'); }
+      if (preset === 'week') { el.dateStart.value = now.startOf('week').format('YYYY-MM-DD'); el.dateEnd.value = now.format('YYYY-MM-DD'); }
+      if (preset === 'month') { el.dateStart.value = now.startOf('month').format('YYYY-MM-DD'); el.dateEnd.value = now.format('YYYY-MM-DD'); }
+      applyFilters();
+    });
+    el.btnExport.addEventListener('click', downloadCsv);
+    el.logsBody.addEventListener('click', (event) => { const button = event.target.closest('.view-employee'); if (button) openEmployeeModal(logsCache.find((log) => log.id === button.dataset.id) || {}); });
+    el.employeeModalClose.addEventListener('click', () => { el.employeeModal.classList.add('hidden'); el.employeeModal.classList.remove('flex'); });
 
     el.paginationPrev.addEventListener('click', async () => {
       if (page <= 0) return;
